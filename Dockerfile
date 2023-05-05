@@ -1,32 +1,22 @@
 # Use an official Node.js runtime as a parent image
 FROM node:20
-
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy the client package.json file to the working directory
-COPY ./client/package*.json ./client/
+# Copy the package.json files for the client and server
+COPY client/package*.json ./client/
+COPY server/package*.json ./server/
 
-# Copy the server package.json file to the working directory
-COPY ./server/package*.json ./server/
+# Install dependencies for the client and server
+RUN cd client && npm install
+RUN cd ../server && npm install
 
-# Install any needed packages specified in the client package.json file
-WORKDIR /app/client
-RUN npm install
+# Copy the client and server code to the container
+COPY client ./client
+COPY server ./server
 
-# Install any needed packages specified in the server package.json file
-WORKDIR /app/server
-RUN npm install
+# Expose port 3000 for the client and 5000 for the server
+EXPOSE 3000 5000
 
-# Copy the rest of the client files to the working directory
-WORKDIR /app
-COPY ./client .
-
-# Copy the rest of the server files to the working directory
-COPY ./server .
-
-# Make port 80 available to the world outside this container
-EXPOSE 5000
-
-# Run the server.js file
-CMD ["npm", "start"]
+# Start the client and server
+CMD cd server && npm start & cd ../client && npm start
